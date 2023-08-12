@@ -1,15 +1,26 @@
 package api
 
-import "github.com/gin-gonic/gin"
+import (
+	"fmt"
+
+	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
+)
 
 func Start() {
-	gin.SetMode(gin.ReleaseMode)
-	r := gin.New()
-	r.GET("/", func(ctx *gin.Context) {
-		ctx.PureJSON(200, gin.H{
+	r := fiber.New(fiber.Config{
+		AppName:       "Discochad",
+		StrictRouting: true,
+		CaseSensitive: true,
+		Prefork:       true,
+	})
+
+	r.Get("/", func(ctx *fiber.Ctx) {
+		ctx.(200, gin.H{
 			"success": true,
 		})
 	})
 
-	r.Run()
+	fmt.Println("Server Has Been Started")
+	r.Listen(":8080")
 }

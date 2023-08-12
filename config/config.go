@@ -2,8 +2,6 @@ package config
 
 import (
 	"os"
-
-	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -11,8 +9,6 @@ type Config struct {
 }
 
 func GetConfig() Config {
-	godotenv.Load()
-
 	return Config{
 		StorePath: os.Getenv("STORE_PATH"),
 	}
