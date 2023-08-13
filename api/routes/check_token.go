@@ -3,6 +3,7 @@ package routes
 import (
 	database "disco/db"
 	"disco/structs"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -11,7 +12,8 @@ import (
 func TokenMiddleware(db *gorm.DB) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		headers := ctx.GetReqHeaders()
-		token := headers["token"]
+		fmt.Println(headers)
+		token := headers["Token"]
 
 		if len(token) <= 0 {
 			ctx.Status(403)
@@ -28,13 +30,13 @@ func TokenMiddleware(db *gorm.DB) fiber.Handler {
 				Message: "Internal Server Error",
 			})
 		} else {
-			if (user == structs.User{}) {
+			if (user != structs.User{}) {
 				ctx.Locals("User", user)
 			} else {
 				ctx.Status(403)
 				return ctx.JSON(structs.Response{
 					Success: false,
-					Message: "Invalid Token, Unauthenticated",
+					Message: "Unauthenticated",
 				})
 			}
 		}

@@ -7,7 +7,9 @@ import (
 
 func CreateBotRoute(db *gorm.DB) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-		return ctx.JSON(ctx.App().Stack())
+		user := ctx.Locals("User")
+
+		return ctx.JSON(user)
 	}
 }
 
