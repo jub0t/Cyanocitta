@@ -1,6 +1,7 @@
 ## Features
 
-- Supported Language
+- Memory Efficient
+- Supported Languages
   - Node.js
   - Python
   - Golang
@@ -12,4 +13,4 @@
 
 ## Recommended
 
-- A Linux Machine
+- A Linux Machine (Windows might aswell work)
