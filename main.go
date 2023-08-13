@@ -16,7 +16,7 @@ func main() {
 	config := config.GetConfig()
 	fmt.Println(config)
 
-	db := database.GetDbConnection()
+	db := database.GetDB()
 	db.AutoMigrate(&structs.User{})
 	api.Start(db)
 }

@@ -8,15 +8,6 @@ var (
 	GoLang int8 = 3
 )
 
-type User struct {
-	gorm.Model
-
-	Username string
-	Password string
-	Id       string
-	Created  string
-}
-
 type Process struct {
 	gorm.Model
 
@@ -33,7 +24,17 @@ type Bot struct {
 }
 
 type Response struct {
-	Data    []interface{}
+	Data    AnyData
 	Success bool
 	Message string
+}
+
+type AnyData map[string]interface{}
+
+type User struct {
+	gorm.Model
+
+	Username string
+	Password string
+	Token    string
 }

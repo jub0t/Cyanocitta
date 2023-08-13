@@ -1,6 +1,7 @@
 package db
 
 import (
+	"disco/structs"
 	"disco/utils"
 	"fmt"
 	"os"
@@ -9,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetDbConnection() *gorm.DB {
+func GetDB() *gorm.DB {
 	dsn := utils.MakeMysqlDsn(utils.DsnConfig{
 		Port:     os.Getenv("DBPORT"),
 		User:     os.Getenv("DBUSER"),
@@ -22,6 +23,9 @@ func GetDbConnection() *gorm.DB {
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	// Debug Only
+	db.Delete(structs.User{})
 
 	return db
 }
