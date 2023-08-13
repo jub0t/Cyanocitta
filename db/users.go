@@ -13,8 +13,8 @@ func UserExists(db *gorm.DB, username string) bool {
 	return userCount > 0
 }
 
-func GetUserByToken(db *gorm.DB, username string) (structs.User, error) {
+func GetUserByToken(db *gorm.DB, token string) (structs.User, error) {
 	var user structs.User
-	err := db.Where("username = ?", username).First(&user).Error
+	err := db.Where("token = ?", token).First(&user).Error
 	return user, err
 }
