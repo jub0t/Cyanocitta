@@ -20,9 +20,9 @@ type Bot struct {
 }
 
 type Response struct {
-	Data    AnyData
 	Success bool
 	Message string
+	Data    AnyData
 }
 
 type AnyData map[string]interface{}
