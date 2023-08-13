@@ -2,7 +2,6 @@ package api
 
 import (
 	"disco/api/routes"
-	"fmt"
 
 	"github.com/goccy/go-json"
 	"github.com/gofiber/fiber/v2"
@@ -28,6 +27,5 @@ func Start(db *gorm.DB) {
 	r.Post("/create-bot", routes.CreateBotRoute(db))
 	r.Post("/register", routes.DeleteBotRoute(db))
 
-	fmt.Println("Server Has Been Started")
 	r.Listen(":8080")
 }
