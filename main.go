@@ -13,6 +13,5 @@ func main() {
 
 	db := database.GetDbConnection()
 	db.AutoMigrate(&structs.User{})
-
-	api.Start()
+	api.Start(db)
 }
