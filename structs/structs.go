@@ -14,9 +14,10 @@ type Bot struct {
 	gorm.Model
 
 	Name        string
-	OwnerId     string
+	OwnerId     uint
 	BotId       string
 	AutoRestart bool
+	MaxRestarts int8
 	Language    int8
 }
 
