@@ -41,4 +41,5 @@ type NodeInstance struct {
 	RestartOnStop bool
 	MaxRestarts   int8
 	Name          string
+	CheckInterval int
 }

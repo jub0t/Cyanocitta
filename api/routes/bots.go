@@ -18,3 +18,9 @@ func DeleteBotRoute(db *gorm.DB) fiber.Handler {
 		return ctx.JSON(ctx.App().Stack())
 	}
 }
+
+func StartBotRoute(db *gorm.DB) fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		return ctx.JSON(ctx.App().Stack())
+	}
+}
