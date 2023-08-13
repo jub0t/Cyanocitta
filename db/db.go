@@ -1,4 +1,4 @@
-package db
+package database
 
 import (
 	"disco/structs"
@@ -25,7 +25,7 @@ func GetDB() *gorm.DB {
 	}
 
 	// Debug Only
-	db.Delete(structs.User{})
+	db.Delete(&structs.User{})
 
 	return db
 }

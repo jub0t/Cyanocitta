@@ -1,6 +1,8 @@
 package structs
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 var (
 	JsLang int8 = 1
@@ -8,19 +10,13 @@ var (
 	GoLang int8 = 3
 )
 
-type Process struct {
-	gorm.Model
-
-	Name string
-	Id   string
-}
-
 type Bot struct {
 	gorm.Model
 
-	Name     string
-	BotId    string
-	Language int8
+	Name        string
+	BotId       string
+	AutoRestart bool
+	Language    int8
 }
 
 type Response struct {

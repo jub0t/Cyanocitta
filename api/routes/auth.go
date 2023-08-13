@@ -1,6 +1,7 @@
 package routes
 
 import (
+	database "disco/db"
 	"disco/structs"
 	"disco/utils"
 	"encoding/json"
@@ -38,6 +39,13 @@ func RegisterRoute(db *gorm.DB) fiber.Handler {
 			ctx.JSON(structs.Response{
 				Success: false,
 				Message: "Username must be atleast 3 characters",
+			})
+		}
+
+		if database.UserExists(db, username) {
+			return ctx.JSON(structs.Response{
+				Success: false,
+				Message: "Username is taken",
 			})
 		}
 
