@@ -10,7 +10,4 @@
 
 - MySQL (>v8.0.0 Preferably)
 - Golang (The Compiler Toolchain)
-
-## Recommended
-
-- A Linux Machine (Windows might aswell work)
+- A Linux Machine (Ubuntu Preferably)
