@@ -17,7 +17,7 @@ func Start(db *gorm.DB) {
 		// Settings For Speed
 		StrictRouting:         true,
 		CaseSensitive:         true,
-		Prefork:               true,
+		Prefork:               false, // Don't Enable
 		DisableDefaultDate:    true,
 		DisableStartupMessage: true,
 		AppName:               "Discochad",

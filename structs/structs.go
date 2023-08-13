@@ -35,3 +35,10 @@ type User struct {
 	Password string
 	Token    string
 }
+
+type NodeInstance struct {
+	IndexFile     string
+	RestartOnStop bool
+	MaxRestarts   int8
+	Name          string
+}

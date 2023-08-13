@@ -24,4 +24,4 @@ go.work
 /build
 /bin
 .env
-
+/node
