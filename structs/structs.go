@@ -31,3 +31,9 @@ type Bot struct {
 	BotId    string
 	Language int8
 }
+
+type Response struct {
+	Data    []interface{}
+	Success bool
+	Message string
+}

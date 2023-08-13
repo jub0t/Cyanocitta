@@ -10,12 +10,14 @@ import (
 
 func Start(db *gorm.DB) {
 	r := fiber.New(fiber.Config{
-		AppName:       "Discochad",
-		StrictRouting: true,
-		CaseSensitive: true,
-		Prefork:       true,
-		JSONEncoder:   json.Marshal,
-		JSONDecoder:   json.Unmarshal,
+		StrictRouting:         true,
+		CaseSensitive:         true,
+		Prefork:               true,
+		DisableDefaultDate:    true,
+		DisableStartupMessage: true,
+		AppName:               "Discochad",
+		JSONEncoder:           json.Marshal,
+		JSONDecoder:           json.Unmarshal,
 	})
 
 	r.Get("/", func(ctx *fiber.Ctx) error {
