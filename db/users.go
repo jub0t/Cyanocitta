@@ -18,3 +18,10 @@ func GetUserByToken(db *gorm.DB, token string) (structs.User, error) {
 	err := db.Where("token = ?", token).First(&user).Error
 	return user, err
 }
+
+func GetUserByUsername(db *gorm.DB, username string) (structs.User, error) {
+	var user structs.User
+	err := db.Where("username = ?", username).First(&user).Error
+
+	return user, err
+}

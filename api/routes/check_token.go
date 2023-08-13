@@ -3,7 +3,6 @@ package routes
 import (
 	database "disco/db"
 	"disco/structs"
-	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -12,7 +11,6 @@ import (
 func TokenMiddleware(db *gorm.DB) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		headers := ctx.GetReqHeaders()
-		fmt.Println(headers)
 		token := headers["Token"]
 
 		if len(token) <= 0 {

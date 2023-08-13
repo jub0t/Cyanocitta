@@ -10,20 +10,60 @@ import (
 	"gorm.io/gorm"
 )
 
-func LoginRoute(db *gorm.DB) fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
-		return ctx.JSON(ctx.App().Stack())
-	}
-}
-
-type RegisterBody struct {
+type AuthBody struct {
 	Username string
 	Password string
 }
 
+func LoginRoute(db *gorm.DB) fiber.Handler {
+	return func(ctx *fiber.Ctx) error {
+		var Body AuthBody
+		raw := ctx.Request().Body()
+
+		if err := json.Unmarshal(raw, &Body); err != nil {
+			// Error
+			ctx.JSON(structs.Response{
+				Success: false,
+				Message: "Invalid JSON Body",
+			})
+		}
+
+		username := Body.Username
+		if len(username) < 3 {
+			ctx.JSON(structs.Response{
+				Success: false,
+				Message: "Username must be atleast 3 characters",
+			})
+		}
+
+		if user, err := database.GetUserByUsername(db, Body.Username); err != nil {
+			return ctx.JSON(structs.Response{
+				Success: false,
+				Message: "Unable to fetch user info",
+			})
+		} else {
+			if (user != structs.User{}) {
+				return ctx.JSON(structs.Response{
+					Success: false,
+					Data: structs.AnyData{
+						"Token": user.Token,
+					},
+				})
+			} else {
+				return ctx.JSON(structs.Response{
+					Success: false,
+					Message: "Unable to fetch user info",
+				})
+			}
+		}
+
+		return nil
+	}
+}
+
 func RegisterRoute(db *gorm.DB) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-		var Body RegisterBody
+		var Body AuthBody
 		raw := ctx.Request().Body()
 
 		if err := json.Unmarshal(raw, &Body); err != nil {
@@ -50,11 +90,8 @@ func RegisterRoute(db *gorm.DB) fiber.Handler {
 		}
 
 		password := Body.Password
-		println(password)
-		pass_valid := utils.VerifyPass(password)
 
-		println(pass_valid)
-		if !pass_valid {
+		if !utils.VerifyPass(password) {
 			// Password Invalid
 			return ctx.JSON(structs.Response{
 				Success: false,
@@ -71,6 +108,7 @@ func RegisterRoute(db *gorm.DB) fiber.Handler {
 
 		return ctx.JSON(structs.Response{
 			Success: true,
+			Message: "Registered new account",
 			Data: structs.AnyData{
 				"Token": token,
 			},

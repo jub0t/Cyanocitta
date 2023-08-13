@@ -1,16 +1,28 @@
 package utils
 
-import (
-	"regexp"
-)
+import "unicode"
 
 func VerifyPass(pass string) bool {
-	// At least Three Chars, One Symbol & One Number
-	pattern := `^(?=.*[A-Za-z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{3,}$`
-	regex, err := regexp.Compile(pattern)
-	if err != nil {
+	// Check password length
+	if len(pass) < 3 {
 		return false
 	}
 
-	return regex.MatchString(pass)
+	var hasSymbol, hasNumber bool
+
+	// Iterate through the password's characters
+	for _, char := range pass {
+		// Check if the character is a symbol
+		if unicode.IsSymbol(char) || unicode.IsPunct(char) {
+			hasSymbol = true
+		}
+
+		// Check if the character is a number
+		if unicode.IsDigit(char) {
+			hasNumber = true
+		}
+	}
+
+	// Return true if the password meets all criteria
+	return hasSymbol && hasNumber
 }

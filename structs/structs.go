@@ -14,6 +14,7 @@ type Bot struct {
 	gorm.Model
 
 	Name        string
+	OwnerId     string
 	BotId       string
 	AutoRestart bool
 	Language    int8
@@ -21,8 +22,8 @@ type Bot struct {
 
 type Response struct {
 	Success bool
-	Message string
-	Data    AnyData
+	Message string  `json:",omitempty"`
+	Data    AnyData `json:",omitempty"`
 }
 
 type AnyData map[string]interface{}
