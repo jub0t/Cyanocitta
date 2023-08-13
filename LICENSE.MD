@@ -35,7 +35,7 @@ By using, modifying, or distributing the software covered by this License, the L
 
 ---
 
-Jareer Abdullah
-jforeverything2007@gmail.com
-13/8/2023
+Jareer Abdullah<br>
+jforeverything2007@gmail.com<br>
+13/8/2023<br>
 

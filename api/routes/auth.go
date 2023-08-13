@@ -50,11 +50,13 @@ func RegisterRoute(db *gorm.DB) fiber.Handler {
 		}
 
 		password := Body.Password
+		println(password)
 		pass_valid := utils.VerifyPass(password)
 
+		println(pass_valid)
 		if !pass_valid {
 			// Password Invalid
-			ctx.JSON(structs.Response{
+			return ctx.JSON(structs.Response{
 				Success: false,
 				Message: "Password must match criteria",
 			})
