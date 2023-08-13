@@ -34,9 +34,10 @@ func StartNodeInstance(i structs.NodeInstance) {
 
 	// Periodically check if the application is still running
 	for {
+		proc := cmd.Process
 		select {
 		case <-time.After(time.Duration(i.CheckInterval)):
-			if isRunning(cmd.Process) {
+			if isRunning(proc) {
 				fmt.Println("Node.js application is still running...")
 			} else {
 				fmt.Println("Node.js application has stopped.")
@@ -45,6 +46,12 @@ func StartNodeInstance(i structs.NodeInstance) {
 		case <-exitCh:
 			fmt.Printf("Application Has Exited\n")
 			return // Application has exited
+		}
+
+		if ram_usage, err := GetRamUsage(proc); err != nil {
+			fmt.Println(err)
+		} else {
+			fmt.Println(ram_usage)
 		}
 	}
 }
