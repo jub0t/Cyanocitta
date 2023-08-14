@@ -1,6 +1,7 @@
 ## Features
 
 - Memory Efficient
+- Indigenous Process Manager
 - Supported Languages
   - Node.js
   - Python

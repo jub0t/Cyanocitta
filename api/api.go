@@ -2,6 +2,7 @@ package api
 
 import (
 	"disco/api/routes"
+	"disco/config"
 	"disco/structs"
 	"time"
 
@@ -12,15 +13,15 @@ import (
 
 var StartTime int64 = time.Now().UnixNano()
 
-func Start(db *gorm.DB) {
+func Start(db *gorm.DB, conf *config.Config) {
 	r := fiber.New(fiber.Config{
 		// Settings For Speed
+		AppName:               "Discochad",
 		StrictRouting:         true,
 		CaseSensitive:         true,
 		Prefork:               false, // Don't Enable
 		DisableDefaultDate:    true,
 		DisableStartupMessage: true,
-		AppName:               "Discochad",
 
 		// Faster JSON
 		JSONEncoder: json.Marshal,
@@ -46,7 +47,7 @@ func Start(db *gorm.DB) {
 
 	// Bot Manage
 	r.Post("/create-bot", routes.TokenMiddleware(db), routes.CreateBotRoute(db))
-	r.Post("/start-bot/:bot_id", routes.TokenMiddleware(db), routes.StartBotRoute(db))
+	r.Post("/start-bot/:bot_id", routes.TokenMiddleware(db), routes.StartBotRoute(db, conf))
 	r.Post("/delete-bot/:bot_id", routes.TokenMiddleware(db), routes.DeleteBotRoute(db))
 
 	r.Listen(":8080")

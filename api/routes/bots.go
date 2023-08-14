@@ -1,10 +1,12 @@
 package routes
 
 import (
+	"disco/config"
 	database "disco/db"
 	"disco/structs"
 	"disco/utils"
 	"encoding/json"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -31,8 +33,10 @@ func CreateBotRoute(db *gorm.DB) fiber.Handler {
 		// Retrieve the user information from the local context.
 		User, ok := ctx.Locals("User").(structs.User)
 		if !ok {
-			return ctx.Status(fiber.StatusInternalServerError).
-				SendString("User information not found in context")
+			return ctx.Status(fiber.StatusInternalServerError).JSON(structs.Response{
+				Success: false,
+				Message: "User not found",
+			})
 		}
 
 		if tx := db.Create(&structs.Bot{
@@ -62,9 +66,25 @@ func DeleteBotRoute(db *gorm.DB) fiber.Handler {
 	}
 }
 
-func StartBotRoute(db *gorm.DB) fiber.Handler {
+func StartBotRoute(db *gorm.DB, conf *config.Config) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		bot_id := ctx.AllParams()["bot_id"]
+
+		User, ok := ctx.Locals("User").(structs.User)
+		if !ok {
+			return ctx.Status(fiber.StatusInternalServerError).JSON(structs.Response{
+				Success: false,
+				Message: "User not found",
+			})
+		}
+
+		if owned := database.UserOwnsBot(db, User.ID, bot_id); owned != true {
+			// Bot Not Owned
+			return ctx.Status(fiber.StatusUnauthorized).JSON(structs.Response{
+				Success: false,
+				Message: "Unauthorized Action",
+			})
+		}
 
 		if len(bot_id) <= 0 {
 			// Empty
@@ -80,9 +100,15 @@ func StartBotRoute(db *gorm.DB) fiber.Handler {
 				Message: "Could not get Bot",
 			})
 		} else {
+			bot_path := utils.PathJoin([]string{conf.StorePath, fmt.Sprintf("/%v", bot_id)})
+
 			return ctx.JSON(structs.ResponseAny{
 				Success: true,
-				Data:    bot,
+				Message: "Bot Has Been Started!",
+				Data: structs.AnyData{
+					"Path": bot_path,
+					"Bot":  bot,
+				},
 			})
 		}
 	}
