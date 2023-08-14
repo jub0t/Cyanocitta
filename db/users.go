@@ -25,3 +25,10 @@ func GetUserByUsername(db *gorm.DB, username string) (structs.User, error) {
 
 	return user, err
 }
+
+func GetBotById(db *gorm.DB, id string) (structs.Bot, error) {
+	var bot structs.Bot
+	err := db.Where("bot_id = ?", id).First(&bot).Error
+
+	return bot, err
+}

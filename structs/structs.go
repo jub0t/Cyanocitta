@@ -21,13 +21,22 @@ type Bot struct {
 	Language    int8
 }
 
+type (
+	AnyData map[string]Any
+	Any     interface{}
+)
+
+type ResponseAny struct {
+	Success bool
+	Message string `json:",omitempty"`
+	Data    Any    `json:",omitempty"`
+}
+
 type Response struct {
 	Success bool
 	Message string  `json:",omitempty"`
 	Data    AnyData `json:",omitempty"`
 }
-
-type AnyData map[string]interface{}
 
 type User struct {
 	gorm.Model

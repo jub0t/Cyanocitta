@@ -1,7 +1,9 @@
 package routes
 
 import (
+	database "disco/db"
 	"disco/structs"
+	"disco/utils"
 	"encoding/json"
 
 	"github.com/gofiber/fiber/v2"
@@ -38,6 +40,7 @@ func CreateBotRoute(db *gorm.DB) fiber.Handler {
 			OwnerId:     User.ID,
 			AutoRestart: false,
 			MaxRestarts: 0,
+			BotId:       utils.GenToken(32),
 			Language:    Body.Language,
 		}); tx.RowsAffected <= 0 {
 			return ctx.JSON(structs.Response{
@@ -61,6 +64,26 @@ func DeleteBotRoute(db *gorm.DB) fiber.Handler {
 
 func StartBotRoute(db *gorm.DB) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-		return ctx.JSON(ctx.App().Stack())
+		bot_id := ctx.AllParams()["bot_id"]
+
+		if len(bot_id) <= 0 {
+			// Empty
+			return ctx.JSON(structs.Response{
+				Success: false,
+				Message: "Invalid BotId",
+			})
+		}
+
+		if bot, err := database.GetBotById(db, bot_id); err != nil {
+			return ctx.JSON(structs.Response{
+				Success: false,
+				Message: "Could not get Bot",
+			})
+		} else {
+			return ctx.JSON(structs.ResponseAny{
+				Success: true,
+				Data:    bot,
+			})
+		}
 	}
 }

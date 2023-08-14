@@ -43,8 +43,11 @@ func Start(db *gorm.DB) {
 
 	r.Post("/login", routes.LoginRoute(db))
 	r.Post("/register", routes.RegisterRoute(db))
+
+	// Bot Manage
 	r.Post("/create-bot", routes.TokenMiddleware(db), routes.CreateBotRoute(db))
-	r.Post("/delete-bot/:bot_id", routes.DeleteBotRoute(db))
+	r.Post("/start-bot/:bot_id", routes.TokenMiddleware(db), routes.StartBotRoute(db))
+	r.Post("/delete-bot/:bot_id", routes.TokenMiddleware(db), routes.DeleteBotRoute(db))
 
 	r.Listen(":8080")
 }
