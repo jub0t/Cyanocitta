@@ -142,6 +142,7 @@ func StartBotRoute(db *gorm.DB, conf *config.Config) fiber.Handler {
 					"StartFile": start_file,
 					"Path":      bot_path,
 					"Bot":       bot,
+					"ProcessId": process_id,
 				},
 			})
 		}
