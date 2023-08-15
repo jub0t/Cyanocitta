@@ -101,6 +101,7 @@ func StartBotRoute(db *gorm.DB, conf *config.Config) fiber.Handler {
 				Message: "Could not get Bot",
 			})
 		} else {
+			var process_id int64
 			bot_path := utils.PathJoin([]string{conf.StorePath, fmt.Sprintf("/%v", bot_id)})
 			start_file := utils.PathJoin([]string{bot_path, bot.StartFile})
 
@@ -116,7 +117,7 @@ func StartBotRoute(db *gorm.DB, conf *config.Config) fiber.Handler {
 						CheckInterval: 5,
 					}
 
-					prom.StartNodeInstance(instance)
+					prom.StartInstance(instance)
 					fmt.Println(instance)
 				}
 			case structs.GoLang:

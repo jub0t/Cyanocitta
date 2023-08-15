@@ -46,6 +46,7 @@ func StartNodeInstance(i structs.NodeInstance) error {
 				fmt.Println("Node.js application is still running...")
 			} else {
 				fmt.Println("Node.js application has stopped.")
+				return nil
 			}
 		case <-exitCh:
 			fmt.Printf("Application Has Exited\n")

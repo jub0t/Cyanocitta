@@ -1,6 +1,7 @@
 package prom
 
 import (
+	"disco/structs"
 	"os"
 	"syscall"
 )
@@ -21,4 +22,18 @@ func GetRamUsage(proc *os.Process) (int64, error) {
 	rssBytes := rss * 1024
 
 	return rssBytes, nil
+}
+
+// StartInstance() => Start{Language}Instance()
+func StartInstance(i any) error {
+	switch i.(type) {
+	case structs.NodeInstance:
+		{
+			return StartNodeInstance(i.(structs.NodeInstance))
+		}
+	default:
+		{
+			return nil
+		}
+	}
 }

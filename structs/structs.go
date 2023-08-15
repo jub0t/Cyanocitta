@@ -48,9 +48,9 @@ type User struct {
 }
 
 type NodeInstance struct {
-	IndexFile     string
 	RestartOnStop bool
 	MaxRestarts   int8
 	Name          string
 	CheckInterval int
+	IndexFile     string
 }
