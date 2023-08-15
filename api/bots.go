@@ -1,8 +1,9 @@
-package routes
+package api
 
 import (
 	"disco/config"
 	database "disco/db"
+	"disco/prom"
 	"disco/structs"
 	"disco/utils"
 	"encoding/json"
@@ -101,13 +102,45 @@ func StartBotRoute(db *gorm.DB, conf *config.Config) fiber.Handler {
 			})
 		} else {
 			bot_path := utils.PathJoin([]string{conf.StorePath, fmt.Sprintf("/%v", bot_id)})
+			start_file := utils.PathJoin([]string{bot_path, bot.StartFile})
+
+			switch lang := bot.Language; lang {
+			case structs.JsLang:
+				{
+					// Javascript
+					instance := structs.NodeInstance{
+						IndexFile:     start_file,
+						Name:          bot.Name,
+						RestartOnStop: false,
+						MaxRestarts:   0,
+						CheckInterval: 5,
+					}
+
+					prom.StartNodeInstance(instance)
+					fmt.Println(instance)
+				}
+			case structs.GoLang:
+				{
+				}
+			case structs.Pylang:
+				{
+				}
+			default:
+				{
+					return ctx.JSON(structs.Response{
+						Success: false,
+						Message: "Err! Please select a bot language.",
+					})
+				}
+			}
 
 			return ctx.JSON(structs.ResponseAny{
 				Success: true,
 				Message: "Bot Has Been Started!",
 				Data: structs.AnyData{
-					"Path": bot_path,
-					"Bot":  bot,
+					"StartFile": start_file,
+					"Path":      bot_path,
+					"Bot":       bot,
 				},
 			})
 		}

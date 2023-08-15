@@ -10,6 +10,11 @@ var (
 	GoLang int8 = 3
 )
 
+type (
+	AnyData map[string]Any
+	Any     interface{}
+)
+
 type Bot struct {
 	gorm.Model
 
@@ -19,12 +24,8 @@ type Bot struct {
 	AutoRestart bool
 	MaxRestarts int8
 	Language    int8
+	StartFile   string
 }
-
-type (
-	AnyData map[string]Any
-	Any     interface{}
-)
 
 type ResponseAny struct {
 	Success bool

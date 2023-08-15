@@ -2,20 +2,25 @@ package prom
 
 import (
 	"disco/structs"
+	"disco/utils"
 	"fmt"
 	"os"
 	"os/exec"
 	"time"
 )
 
-func StartNodeInstance(i structs.NodeInstance) {
+func StartNodeInstance(i structs.NodeInstance) error {
 	// Initialize
 	cmd := exec.Command("node", i.IndexFile)
+
+	if !utils.FileExists(i.IndexFile) {
+		return nil
+	}
 
 	// Start the Node.js application
 	if err := cmd.Start(); err != nil {
 		fmt.Println("Error starting Node.js application:", err)
-		return
+		return nil
 	}
 
 	// Create a channel to receive termination signals
@@ -41,11 +46,10 @@ func StartNodeInstance(i structs.NodeInstance) {
 				fmt.Println("Node.js application is still running...")
 			} else {
 				fmt.Println("Node.js application has stopped.")
-				return
 			}
 		case <-exitCh:
 			fmt.Printf("Application Has Exited\n")
-			return // Application has exited
+			return nil // Application has exited
 		}
 
 		if ram_usage, err := GetRamUsage(proc); err != nil {

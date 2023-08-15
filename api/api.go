@@ -1,9 +1,9 @@
 package api
 
 import (
-	"disco/api/routes"
 	"disco/config"
 	"disco/structs"
+	"fmt"
 	"time"
 
 	"github.com/goccy/go-json"
@@ -11,7 +11,10 @@ import (
 	"gorm.io/gorm"
 )
 
-var StartTime int64 = time.Now().UnixNano()
+var (
+	StartTime int64 = time.Now().UnixNano()
+	Port      int   = 8080
+)
 
 func Start(db *gorm.DB, conf *config.Config) {
 	r := fiber.New(fiber.Config{
@@ -42,13 +45,15 @@ func Start(db *gorm.DB, conf *config.Config) {
 		})
 	})
 
-	r.Post("/login", routes.LoginRoute(db))
-	r.Post("/register", routes.RegisterRoute(db))
+	// Authentication
+	r.Post("/login", LoginRoute(db))
+	r.Post("/register", RegisterRoute(db))
 
 	// Bot Manage
-	r.Post("/create-bot", routes.TokenMiddleware(db), routes.CreateBotRoute(db))
-	r.Post("/start-bot/:bot_id", routes.TokenMiddleware(db), routes.StartBotRoute(db, conf))
-	r.Post("/delete-bot/:bot_id", routes.TokenMiddleware(db), routes.DeleteBotRoute(db))
+	r.Post("/create-bot", TokenMiddleware(db), CreateBotRoute(db))
+	r.Post("/start-bot/:bot_id", TokenMiddleware(db), StartBotRoute(db, conf))
+	r.Post("/delete-bot/:bot_id", TokenMiddleware(db), DeleteBotRoute(db))
 
-	r.Listen(":8080")
+	fmt.Printf("Server Should Be Available http://localhost:%v", Port)
+	r.Listen(fmt.Sprintf(":%v", Port))
 }
