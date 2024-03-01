@@ -30,15 +30,3 @@ long getRAMUsage(pid_t pid)
     }
     return -1;
 }
-
-int main()
-{
-    pid_t pid = getpid(); // Get the current process ID
-    double cpuUsage = getCPUUsage(pid);
-    long ramUsage = getRAMUsage(pid);
-
-    std::cout << "CPU Usage: " << cpuUsage << " seconds" << std::endl;
-    std::cout << "RAM Usage: " << ramUsage << " KB" << std::endl;
-
-    return 0;
-}
