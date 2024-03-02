@@ -19,7 +19,7 @@ var (
 func Start(db *gorm.DB, conf *config.Config) {
 	r := fiber.New(fiber.Config{
 		// Settings For Speed
-		AppName:               "Discochad",
+		AppName:               "Cyanocitta",
 		StrictRouting:         true,
 		CaseSensitive:         true,
 		Prefork:               false, // Don't Enable
@@ -36,10 +36,8 @@ func Start(db *gorm.DB, conf *config.Config) {
 
 		return ctx.JSON(structs.Response{
 			Success: true,
-			Message: "Server Is Up & Working!",
 			Data: structs.AnyData{
-				"UptimeMS": (now - StartTime) / 1000 / 1000,
-				"UptimeNS": now - StartTime,
+				"Uptime": now - StartTime,
 			},
 		})
 	})
@@ -52,6 +50,7 @@ func Start(db *gorm.DB, conf *config.Config) {
 	r.Post("/create-bot", TokenMiddleware(db), CreateBotRoute(db))
 	r.Post("/start-bot/:bot_id", TokenMiddleware(db), StartBotRoute(db, conf))
 	r.Post("/delete-bot/:bot_id", TokenMiddleware(db), DeleteBotRoute(db))
+  r.Get("/process-resources/:pid", ProcessResourcesRoute(db))
 
 	fmt.Printf("Server Should Be Available http://localhost:%v\n", Port)
 	r.Listen(fmt.Sprintf("127.0.0.1:%v", Port))

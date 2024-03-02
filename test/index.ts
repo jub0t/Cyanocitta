@@ -18,4 +18,5 @@ client.on('interactionCreate', async interaction => {
     }
 });
 
-client.login(Deno.env.get('TOKEN'));
+// client.login(Deno.env.get('TOKEN'));
+while (true) {}
