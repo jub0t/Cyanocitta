@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
   "disco/prom"
   "fmt"
+  "disco/structs"
 )
 
 func ProcessResourcesRoute(db *gorm.DB) fiber.Handler {
@@ -15,9 +16,15 @@ func ProcessResourcesRoute(db *gorm.DB) fiber.Handler {
     
     if err != nil {
       fmt.Printf("%s", err)
-      return ctx.JSON("error broski, could not find process")
+      return ctx.JSON(structs.Response{
+        Success: false,
+        Message: "Process not found, could not fetch resource data",
+      })
     }
 
-		return ctx.JSON(status)
+		return ctx.JSON(structs.ResponseAny{
+      Data: status,
+      Success: true,
+    })
 	}
 }
