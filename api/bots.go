@@ -10,6 +10,7 @@ import (
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
 
@@ -18,14 +19,14 @@ type CreateBotBody struct {
 	Language int8
 }
 
-func CreateBotRoute(db *gorm.DB) fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
+func CreateBotRoute(db *gorm.DB) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
 		var Body CreateBotBody
-		raw := ctx.Request().Body()
+		raw := ctx.Request().Body
 
 		if err := json.Unmarshal(raw, &Body); err != nil {
 			// Error
-			ctx.JSON(structs.Response{
+			ctx.JSON(200, structs.Response{
 				Success: false,
 				Message: "Invalid JSON Body",
 			})
@@ -34,7 +35,7 @@ func CreateBotRoute(db *gorm.DB) fiber.Handler {
 		// Retrieve the user information from the local context.
 		User, ok := ctx.Locals("User").(structs.User)
 		if !ok {
-			return ctx.Status(fiber.StatusInternalServerError).JSON(structs.Response{
+			return ctx.JSON(200, structs.Response{
 				Success: false,
 				Message: "User not found",
 			})
@@ -48,12 +49,12 @@ func CreateBotRoute(db *gorm.DB) fiber.Handler {
 			BotId:       utils.GenToken(32),
 			Language:    Body.Language,
 		}); tx.RowsAffected <= 0 {
-			return ctx.JSON(structs.Response{
+			return ctx.JSON(200, structs.Response{
 				Success: false,
 				Message: "Error creating new bot",
 			})
 		} else {
-			return ctx.JSON(structs.Response{
+			return ctx.JSON(200, structs.Response{
 				Success: true,
 				Message: "New bot created",
 			})

@@ -6,7 +6,7 @@ import (
 	"disco/utils"
 	"encoding/json"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
 
@@ -15,14 +15,14 @@ type AuthBody struct {
 	Password string
 }
 
-func LoginRoute(db *gorm.DB) fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
+func LoginRoute(db *gorm.DB) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
 		var Body AuthBody
-		raw := ctx.Request().Body()
+		raw := ctx.Request().Body
 
 		if err := json.Unmarshal(raw, &Body); err != nil {
 			// Error
-			ctx.JSON(structs.Response{
+			ctx.JSON(200, structs.Response{
 				Success: false,
 				Message: "Invalid JSON Body",
 			})
@@ -30,27 +30,27 @@ func LoginRoute(db *gorm.DB) fiber.Handler {
 
 		username := Body.Username
 		if len(username) < 3 {
-			ctx.JSON(structs.Response{
+			ctx.JSON(200, structs.Response{
 				Success: false,
 				Message: "Username must be atleast 3 characters",
 			})
 		}
 
 		if user, err := database.GetUserByUsername(db, Body.Username); err != nil {
-			return ctx.JSON(structs.Response{
+			return ctx.JSON(200, structs.Response{
 				Success: false,
 				Message: "Unable to fetch user info",
 			})
 		} else {
 			if (user != structs.User{}) {
-				return ctx.JSON(structs.Response{
+				return ctx.JSON(200, structs.Response{
 					Success: false,
 					Data: structs.AnyData{
 						"Token": user.Token,
 					},
 				})
 			} else {
-				return ctx.JSON(structs.Response{
+				return ctx.JSON(200, structs.Response{
 					Success: false,
 					Message: "Unable to fetch user info",
 				})
@@ -61,14 +61,14 @@ func LoginRoute(db *gorm.DB) fiber.Handler {
 	}
 }
 
-func RegisterRoute(db *gorm.DB) fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
+func RegisterRoute(db *gorm.DB) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
 		var Body AuthBody
 		raw := ctx.Request().Body()
 
 		if err := json.Unmarshal(raw, &Body); err != nil {
 			// Error
-			ctx.JSON(structs.Response{
+			ctx.Success(200, structs.Response{
 				Success: false,
 				Message: "Invalid JSON Body",
 			})
@@ -76,14 +76,14 @@ func RegisterRoute(db *gorm.DB) fiber.Handler {
 
 		username := Body.Username
 		if len(username) < 3 {
-			ctx.JSON(structs.Response{
+			ctx.JSON(200, structs.Response{
 				Success: false,
 				Message: "Username must be atleast 3 characters",
 			})
 		}
 
 		if database.UserExists(db, username) {
-			return ctx.JSON(structs.Response{
+			return ctx.JSON(200, structs.Response{
 				Success: false,
 				Message: "Username is taken",
 			})
@@ -93,7 +93,7 @@ func RegisterRoute(db *gorm.DB) fiber.Handler {
 
 		if !utils.VerifyPass(password) {
 			// Password Invalid
-			return ctx.JSON(structs.Response{
+			return ctx.JSON(200, structs.Response{
 				Success: false,
 				Message: "Password must match criteria",
 			})
@@ -106,7 +106,7 @@ func RegisterRoute(db *gorm.DB) fiber.Handler {
 			Token:    token,
 		})
 
-		return ctx.JSON(structs.Response{
+		return ctx.JSON(200, structs.Response{
 			Success: true,
 			Message: "Registered new account",
 			Data: structs.AnyData{

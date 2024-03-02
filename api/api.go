@@ -6,52 +6,40 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/goccy/go-json"
-	"github.com/gofiber/fiber/v2"
+	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
 
 var (
-	StartTime int64 = time.Now().UnixNano()
-	Port      int   = 8080
+	StartTime int = time.Now().Second()
+	Port      int = 8080
 )
 
 func Start(db *gorm.DB, conf *config.Config) {
-	r := fiber.New(fiber.Config{
-		// Settings For Speed
-		AppName:               "Cyanocitta",
-		StrictRouting:         true,
-		CaseSensitive:         true,
-		Prefork:               false, // Don't Enable
-		DisableDefaultDate:    true,
-		DisableStartupMessage: true,
+	r := echo.New()
 
-		// Faster JSON
-		JSONEncoder: json.Marshal,
-		JSONDecoder: json.Unmarshal,
-	})
-
-	r.Get("/", func(ctx *fiber.Ctx) error {
-		now := time.Now().UnixNano()
-
+	r.GET("/", func(ctx echo.Context) error {
 		return ctx.JSON(structs.Response{
 			Success: true,
 			Data: structs.AnyData{
-				"Uptime": now - StartTime,
+				"Uptime": time.Now().Second() - StartTime,
 			},
 		})
 	})
 
+	// Middlewares
+	r.Use(Serdeware)
+
 	// Authentication
-	r.Post("/login", LoginRoute(db))
-	r.Post("/register", RegisterRoute(db))
+	r.POST("/login", LoginRoute(db))
+	r.POST("/register", RegisterRoute(db))
 
 	// Bot Manage
-	r.Post("/create-bot", TokenMiddleware(db), CreateBotRoute(db))
-	r.Post("/start-bot/:bot_id", TokenMiddleware(db), StartBotRoute(db, conf))
-	r.Post("/delete-bot/:bot_id", TokenMiddleware(db), DeleteBotRoute(db))
-  r.Get("/process-resources/:pid", ProcessResourcesRoute(db))
+	r.POST("/create-bot", TokenMiddleware(db), CreateBotRoute(db))
+	r.POST("/start-bot/:bot_id", TokenMiddleware(db), StartBotRoute(db, conf))
+	r.POST("/delete-bot/:bot_id", TokenMiddleware(db), DeleteBotRoute(db))
+	r.POST("/process-resources/:pid", ProcessResourcesRoute(db))
 
 	fmt.Printf("Server Should Be Available http://localhost:%v\n", Port)
-	r.Listen(fmt.Sprintf("127.0.0.1:%v", Port))
+	r.Start(fmt.Sprintf("127.0.0.1:%v", Port))
 }
