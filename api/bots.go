@@ -33,9 +33,9 @@ func CreateBotRoute(db *gorm.DB) echo.HandlerFunc {
 		}
 
 		// Retrieve the user information from the local context.
-		User, ok := ctx.Locals("User").(structs.User)
+		User, ok := ctx.Request().Context("User").(structs.User)
 		if !ok {
-			return ctx.JSON(200, structs.Response{
+			return ctx(fiber.StatusInternalServerError).JSON(structs.Response{
 				Success: false,
 				Message: "User not found",
 			})

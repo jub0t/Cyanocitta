@@ -19,7 +19,7 @@ func Start(db *gorm.DB, conf *config.Config) {
 	r := echo.New()
 
 	r.GET("/", func(ctx echo.Context) error {
-		return ctx.JSON(structs.Response{
+		return ctx.JSON(200, structs.Response{
 			Success: true,
 			Data: structs.AnyData{
 				"Uptime": time.Now().Second() - StartTime,

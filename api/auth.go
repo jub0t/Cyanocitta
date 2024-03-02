@@ -68,7 +68,7 @@ func RegisterRoute(db *gorm.DB) echo.HandlerFunc {
 
 		if err := json.Unmarshal(raw, &Body); err != nil {
 			// Error
-			ctx.Success(200, structs.Response{
+			ctx.JSON(200, structs.Response{
 				Success: false,
 				Message: "Invalid JSON Body",
 			})
