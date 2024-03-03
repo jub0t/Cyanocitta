@@ -22,9 +22,7 @@ func Start(conf *config.Config) {
 	r.GET("/", func(ctx echo.Context) error {
 		return ctx.JSON(200, structs.Response{
 			Success: true,
-			Data: structs.AnyData{
-				"Uptime": time.Now().UnixMilli() - StartTime,
-			},
+			Message: "Success",
 		})
 	})
 
@@ -40,7 +38,7 @@ func Start(conf *config.Config) {
 	r.POST("/create-bot", CreateBotRoute(db), TokenMiddleware)
 	r.POST("/start-bot/:bot_id", StartBotRoute(db), TokenMiddleware)
 	r.POST("/delete-bot/:bot_id", DeleteBotRoute(db), TokenMiddleware)
-	r.POST("/process-resources/:pid", ProcessResourcesRoute())
+	r.GET("/process-resources/:pid", ProcessResourcesRoute())
 
 	fmt.Printf("Server Should Be Available http://localhost:%v\n", Port)
 	r.Start(fmt.Sprintf("127.0.0.1:%v", Port))

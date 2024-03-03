@@ -13,7 +13,7 @@ import (
 
 var DB *gorm.DB
 
-func GetDB() *gorm.DB {
+func Connect() *gorm.DB {
 	dsn := utils.MakeMysqlDsn(utils.DsnConfig{
 		Port:     os.Getenv("DBPORT"),
 		User:     os.Getenv("DBUSER"),

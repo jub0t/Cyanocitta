@@ -37,7 +37,7 @@ func CreateBotRoute(db *gorm.DB) echo.HandlerFunc {
 		name := body["Name"].(string)
 		language := body["Language"].(int8)
 
-		result := database.GetDB().Create(&structs.Bot{
+		result := database.DB.Create(&structs.Bot{
 			Name:        name,
 			OwnerId:     uint(user.ID),
 			AutoRestart: false,

@@ -2,6 +2,8 @@ package main
 
 import (
 	"disco/api"
+	database "disco/db"
+	"disco/structs"
 
 	// database "disco/db"
 	// "disco/structs"
@@ -13,10 +15,10 @@ func main() {
 	// Load environment variables from .env file
 	godotenv.Load()
 
-	// Get the loaded envs & initialize database
-	// db := database.GetDB()
+	// Get the loaded envs & initialize database
+	db := database.Connect()
 
 	// Auto-migrate the databse to newer structure and start the REST API
-	// db.AutoMigrate(&structs.User{}, &structs.Bot{})
+	db.AutoMigrate(&structs.User{}, &structs.Bot{})
 	api.Start(nil)
 }
