@@ -11,6 +11,8 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+var DB *gorm.DB
+
 func GetDB() *gorm.DB {
 	dsn := utils.MakeMysqlDsn(utils.DsnConfig{
 		Port:     os.Getenv("DBPORT"),
@@ -20,15 +22,18 @@ func GetDB() *gorm.DB {
 		Database: os.Getenv("DBNAME"),
 	})
 
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+	new_db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Silent),
 	})
+
+	DB = new_db
+
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	// Debug Only
-	db.Delete(&structs.User{})
+	DB.Delete(&structs.User{})
 
-	return db
+	return DB
 }

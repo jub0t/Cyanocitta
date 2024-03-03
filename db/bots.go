@@ -19,3 +19,10 @@ func GetBotById(db *gorm.DB, id string) (structs.Bot, error) {
 
 	return bot, err
 }
+
+func DeleteBot(db *gorm.DB, id string) error {
+	var bot structs.Bot
+	err := db.Where("bot_id = ?", id).First(&bot).Error
+
+	return err
+}

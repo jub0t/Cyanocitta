@@ -1,18 +1,20 @@
 package api
 
 import (
+	"net/http"
+
 	"disco/config"
 	database "disco/db"
 	"disco/prom"
 	"disco/structs"
 	"disco/utils"
-	"encoding/json"
 	"fmt"
 
-	"github.com/gofiber/fiber/v2"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
+
+var Config = config.GetConfig()
 
 type CreateBotBody struct {
 	Name     string
@@ -20,132 +22,164 @@ type CreateBotBody struct {
 }
 
 func CreateBotRoute(db *gorm.DB) echo.HandlerFunc {
-	return func(ctx echo.Context) error {
-		var Body CreateBotBody
-		raw := ctx.Request().Body
-
-		if err := json.Unmarshal(raw, &Body); err != nil {
-			// Error
-			ctx.JSON(200, structs.Response{
-				Success: false,
-				Message: "Invalid JSON Body",
-			})
-		}
+	return func(c echo.Context) error {
+		body := c.Get("Body").(structs.AnyData)
 
 		// Retrieve the user information from the local context.
-		User, ok := ctx.Request().Context("User").(structs.User)
+		user, ok := c.Request().Context().Value("User").(*structs.User)
 		if !ok {
-			return ctx(fiber.StatusInternalServerError).JSON(structs.Response{
+			return echo.NewHTTPError(http.StatusInternalServerError, structs.Response{
 				Success: false,
 				Message: "User not found",
 			})
 		}
 
-		if tx := db.Create(&structs.Bot{
-			Name:        Body.Name,
-			OwnerId:     User.ID,
+		name := body["Name"].(string)
+		language := body["Language"].(int8)
+
+		result := database.GetDB().Create(&structs.Bot{
+			Name:        name,
+			OwnerId:     uint(user.ID),
 			AutoRestart: false,
 			MaxRestarts: 0,
 			BotId:       utils.GenToken(32),
-			Language:    Body.Language,
-		}); tx.RowsAffected <= 0 {
-			return ctx.JSON(200, structs.Response{
-				Success: false,
-				Message: "Error creating new bot",
-			})
-		} else {
-			return ctx.JSON(200, structs.Response{
-				Success: true,
-				Message: "New bot created",
-			})
+			Language:    language,
+		})
+
+		responseCode := http.StatusCreated
+		message := "New bot created"
+		if result.RowsAffected == 0 {
+			responseCode = http.StatusOK
+			message = "Error creating new bot"
 		}
+
+		return c.JSON(responseCode, structs.Response{
+			Success: true,
+			Message: message,
+		})
 	}
 }
 
-func DeleteBotRoute(db *gorm.DB) fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
-		return ctx.JSON(ctx.App().Stack())
-	}
-}
+func DeleteBotRoute(db *gorm.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		botId := c.Param("bot_id")
 
-func StartBotRoute(db *gorm.DB, conf *config.Config) fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
-		bot_id := ctx.AllParams()["bot_id"]
-
-		User, ok := ctx.Locals("User").(structs.User)
+		user, ok := c.Request().Context().Value("User").(*structs.User)
 		if !ok {
-			return ctx.Status(fiber.StatusInternalServerError).JSON(structs.Response{
+			return echo.NewHTTPError(http.StatusInternalServerError, structs.Response{
 				Success: false,
 				Message: "User not found",
 			})
 		}
 
-		if owned := database.UserOwnsBot(db, User.ID, bot_id); owned != true {
+		owned := database.UserOwnsBot(db, uint(user.ID), botId)
+		if owned != true {
 			// Bot Not Owned
-			return ctx.Status(fiber.StatusUnauthorized).JSON(structs.Response{
+			return echo.NewHTTPError(http.StatusUnauthorized, structs.Response{
 				Success: false,
 				Message: "Unauthorized Action",
 			})
 		}
 
-		if len(bot_id) <= 0 {
-			// Empty
-			return ctx.JSON(structs.Response{
+		if len(botId) <= 0 {
+			// Invalid BotId
+			return c.JSON(http.StatusBadRequest, structs.Response{
 				Success: false,
 				Message: "Invalid BotId",
 			})
 		}
 
-		if bot, err := database.GetBotById(db, bot_id); err != nil {
-			return ctx.JSON(structs.Response{
+		err := database.DeleteBot(db, botId)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, structs.Response{
+				Success: false,
+				Message: "Failed deleting bot",
+			})
+		}
+
+		return c.NoContent(http.StatusOK)
+	}
+}
+
+func StartBotRoute(db *gorm.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		botId := c.Param("bot_id")
+
+		user, ok := c.Request().Context().Value("User").(*structs.User)
+		if !ok {
+			return echo.NewHTTPError(http.StatusInternalServerError, structs.Response{
+				Success: false,
+				Message: "User not found",
+			})
+		}
+
+		owned := database.UserOwnsBot(db, uint(user.ID), botId)
+		if owned != true {
+			// Bot Not Owned
+			return echo.NewHTTPError(http.StatusUnauthorized, structs.Response{
+				Success: false,
+				Message: "Unauthorized Action",
+			})
+		}
+
+		if len(botId) <= 0 {
+			// Empty
+			return c.JSON(http.StatusBadRequest, structs.Response{
+				Success: false,
+				Message: "Invalid BotId",
+			})
+		}
+
+		bot, err := database.GetBotById(db, botId)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, structs.Response{
 				Success: false,
 				Message: "Could not get Bot",
 			})
-		} else {
-			var process_id int64
-			bot_path := utils.PathJoin([]string{conf.StorePath, fmt.Sprintf("/%v", bot_id)})
-			start_file := utils.PathJoin([]string{bot_path, bot.StartFile})
+		}
 
-			switch lang := bot.Language; lang {
-			case structs.JsLang:
-				{
-					// Javascript
-					instance := structs.NodeInstance{
-						IndexFile:     start_file,
-						Name:          bot.Name,
-						RestartOnStop: false,
-						MaxRestarts:   0,
-						CheckInterval: 5,
-					}
+		processId := 0
+		botPath := utils.PathJoin([]string{Config.StorePath, fmt.Sprintf("%v", botId)})
+		startFile := utils.PathJoin([]string{botPath, bot.StartFile})
 
-					prom.StartInstance(instance)
-					fmt.Println(instance)
-				}
-			case structs.GoLang:
-				{
-				}
-			case structs.Pylang:
-				{
-				}
-			default:
-				{
-					return ctx.JSON(structs.Response{
-						Success: false,
-						Message: "Err! Please select a bot language.",
-					})
-				}
+		switch lang := bot.Language; lang {
+		case structs.JsLang:
+			instance := structs.NodeInstance{
+				IndexFile:     startFile,
+				Name:          bot.Name,
+				RestartOnStop: false,
+				MaxRestarts:   0,
+				CheckInterval: 5,
 			}
 
-			return ctx.JSON(structs.ResponseAny{
-				Success: true,
-				Message: "Bot Has Been Started!",
-				Data: structs.AnyData{
-					"StartFile": start_file,
-					"Path":      bot_path,
-					"Bot":       bot,
-					"ProcessId": process_id,
-				},
+			err = prom.StartInstance(instance)
+			if err != nil {
+				return c.JSON(http.StatusBadRequest, structs.Response{
+					Success: false,
+					Message: "Error occured while starting Node.js application",
+					Data: structs.AnyData{
+						"Error": err,
+					},
+				})
+			}
+		case structs.GoLang:
+		case structs.Pylang:
+		default:
+			return c.JSON(http.StatusBadRequest, structs.Response{
+				Success: false,
+				Message: "Err! Please select a bot language.",
 			})
 		}
+
+		return c.JSON(http.StatusOK, structs.ResponseAny{
+			Success: true,
+			Message: "Bot started successfully",
+			Data: structs.AnyData{
+				"StartFile": startFile,
+				"Path":      botPath,
+				"Bot":       bot,
+				"ProcessId": processId,
+			},
+		})
 	}
 }

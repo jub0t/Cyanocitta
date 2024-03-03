@@ -4,7 +4,6 @@ import (
 	database "disco/db"
 	"disco/structs"
 	"disco/utils"
-	"encoding/json"
 
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
@@ -17,18 +16,9 @@ type AuthBody struct {
 
 func LoginRoute(db *gorm.DB) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
-		var Body AuthBody
-		raw := ctx.Request().Body
+		body := ctx.Get("Body").(structs.AnyData)
+		username := body["Username"].(string)
 
-		if err := json.Unmarshal(raw, &Body); err != nil {
-			// Error
-			ctx.JSON(200, structs.Response{
-				Success: false,
-				Message: "Invalid JSON Body",
-			})
-		}
-
-		username := Body.Username
 		if len(username) < 3 {
 			ctx.JSON(200, structs.Response{
 				Success: false,
@@ -36,7 +26,7 @@ func LoginRoute(db *gorm.DB) echo.HandlerFunc {
 			})
 		}
 
-		if user, err := database.GetUserByUsername(db, Body.Username); err != nil {
+		if user, err := database.GetUserByUsername(db, username); err != nil {
 			return ctx.JSON(200, structs.Response{
 				Success: false,
 				Message: "Unable to fetch user info",
@@ -56,25 +46,14 @@ func LoginRoute(db *gorm.DB) echo.HandlerFunc {
 				})
 			}
 		}
-
-		return nil
 	}
 }
 
 func RegisterRoute(db *gorm.DB) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
-		var Body AuthBody
-		raw := ctx.Request().Body()
+		body := ctx.Get("Body").(structs.AnyData)
+		username := body["Username"].(string)
 
-		if err := json.Unmarshal(raw, &Body); err != nil {
-			// Error
-			ctx.JSON(200, structs.Response{
-				Success: false,
-				Message: "Invalid JSON Body",
-			})
-		}
-
-		username := Body.Username
 		if len(username) < 3 {
 			ctx.JSON(200, structs.Response{
 				Success: false,
@@ -89,7 +68,7 @@ func RegisterRoute(db *gorm.DB) echo.HandlerFunc {
 			})
 		}
 
-		password := Body.Password
+		password := body["Password"].(string)
 
 		if !utils.VerifyPass(password) {
 			// Password Invalid
