@@ -35,7 +35,7 @@ func TokenMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		if user.ID != 0 {
-			ctx.Set("User", &user)
+			ctx.Set("User", user)
 		} else {
 			return ctx.JSON(401, structs.Response{
 				Success: false,

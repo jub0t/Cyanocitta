@@ -5,9 +5,11 @@ import (
 )
 
 var (
-	JsLang int8 = 1
-	Pylang int8 = 2
-	GoLang int8 = 3
+	JsLang int = 1
+	PyLang int = 2
+	GoLang int = 3
+
+	Langauges = []int{JsLang, PyLang, GoLang}
 )
 
 type (
@@ -23,7 +25,7 @@ type Bot struct {
 	BotId       string
 	AutoRestart bool
 	MaxRestarts int8
-	Language    int8
+	Language    int
 	StartFile   string
 }
 

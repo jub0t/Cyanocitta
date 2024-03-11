@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 )
 
-func GenToken(length int) string {
+func RandomString(length int) string {
 	tokenBytes := make([]byte, length)
 	_, _ = rand.Read(tokenBytes) // Ignoring the error
 

@@ -78,7 +78,7 @@ func RegisterRoute(db *gorm.DB) echo.HandlerFunc {
 			})
 		}
 
-		token := utils.GenToken(128)
+		token := utils.RandomString(128)
 		db.Create(&structs.User{
 			Username: username,
 			Password: password,

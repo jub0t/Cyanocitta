@@ -1,10 +1,9 @@
 package api
 
 import (
+	"disco/structs"
 	"encoding/json"
-	"errors"
 	"io/ioutil"
-	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
@@ -18,12 +17,20 @@ func CustomBodyParser(next echo.HandlerFunc) echo.HandlerFunc {
 
 		bodyBytes, err := ioutil.ReadAll(reqBodyRaw)
 		if err != nil || len(bodyBytes) == 0 {
-			return next(c)
+			return c.JSON(200, structs.Response{
+				Success: false,
+				Message: "Body required but not found",
+			})
 		}
 
-		var parsedBody map[string]interface{}
+		var parsedBody structs.AnyData
 		if err := json.Unmarshal(bodyBytes, &parsedBody); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid JSON format"))
+			return c.JSON(200, structs.Response{
+				Success: false,
+				Message: "Invalid Body",
+			})
+
+			// echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid JSON format"))
 		}
 
 		c.Set("Body", parsedBody)
