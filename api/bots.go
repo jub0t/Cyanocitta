@@ -16,60 +16,57 @@ import (
 
 var Config = config.GetConfig()
 
-type CreateBotBody struct {
+type CBStruct struct {
 	Name     string
-	Language int8
+	Language int
 }
 
 func CreateBotRoute(db *gorm.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		body := c.Get("Body").(structs.AnyData)
+		var body CBStruct
+
+		err := utils.ParseJSON(c.Request().Body, &body)
+		if err != nil {
+			return c.JSON(200, structs.Response{
+				Success: false,
+				Message: "Invalid Request Body",
+			})
+		}
+
 		user := c.Get("User").(structs.User)
+		lang := body.Language
+		name := body.Name
 
-		name, ok := body["Name"].(string)
-		if !ok {
+		if !utils.IsLanguageValid(lang) {
 			return c.JSON(200, structs.Response{
 				Success: false,
-				Message: "Enter a valid name for the bot",
+				Message: "Invalid language selected for application",
 			})
 		}
 
-		if lang, ok := body["Language"].(int); !ok {
-			println(lang)
-			return c.JSON(200, structs.Response{
-				Success: false,
-				Message: "Choose a language for the bot",
-			})
-		} else {
-			println(lang)
-			if utils.IsLanguageValid(lang) {
-				return c.JSON(200, structs.Response{
-					Success: false,
-					Message: "Invalid language for application",
-				})
-			}
-
-			result := database.DB.Create(&structs.Bot{
-				Name:        name,
-				OwnerId:     uint(user.ID),
-				AutoRestart: false,
-				MaxRestarts: 0,
-				BotId:       utils.RandomString(32),
-				Language:    lang,
-			})
-
-			responseCode := http.StatusCreated
-			message := "New bot created"
-			if result.RowsAffected == 0 {
-				responseCode = http.StatusOK
-				message = "Error creating new bot"
-			}
-
-			return c.JSON(responseCode, structs.Response{
-				Success: true,
-				Message: message,
-			})
+		bot := structs.Bot{
+			Name:        name,
+			OwnerId:     uint(user.ID),
+			AutoRestart: false,
+			MaxRestarts: 0,
+			BotId:       utils.RandomString(8),
+			Language:    lang,
 		}
+
+		result := database.DB.Create(&bot)
+
+		responseCode := http.StatusCreated
+		message := "New bot created"
+		if result.RowsAffected == 0 {
+			responseCode = http.StatusOK
+			message = "Error creating new bot"
+		}
+
+		return c.JSON(responseCode, structs.ResponseAny{
+			Success: true,
+			Message: message,
+			Data:    bot,
+		})
 	}
 }
 
@@ -118,7 +115,7 @@ func StartBotRoute(db *gorm.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		botId := c.Param("bot_id")
 
-		user, ok := c.Request().Context().Value("User").(*structs.User)
+		user, ok := c.Get("User").(structs.User)
 		if !ok {
 			return echo.NewHTTPError(http.StatusInternalServerError, structs.Response{
 				Success: false,
@@ -127,7 +124,7 @@ func StartBotRoute(db *gorm.DB) echo.HandlerFunc {
 		}
 
 		owned := database.UserOwnsBot(db, uint(user.ID), botId)
-		if owned != true {
+		if !owned {
 			// Bot Not Owned
 			return echo.NewHTTPError(http.StatusUnauthorized, structs.Response{
 				Success: false,
@@ -193,6 +190,20 @@ func StartBotRoute(db *gorm.DB) echo.HandlerFunc {
 				"Bot":       bot,
 				"ProcessId": processId,
 			},
+		})
+	}
+}
+
+func GetBotInfo(db *gorm.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		botId := c.Param("bot_id")
+
+		var bot structs.Bot
+		database.DB.Model(&bot).Where("bot_id = ?", botId).Find(&bot)
+
+		return c.JSON(http.StatusOK, structs.ResponseAny{
+			Success: true,
+			Data:    bot,
 		})
 	}
 }

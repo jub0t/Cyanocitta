@@ -30,7 +30,7 @@ func TokenMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		if err != nil {
 			return ctx.JSON(500, structs.Response{
 				Success: false,
-				Message: "Internal Server Error",
+				Message: "Unauthorized - Please login",
 			})
 		}
 

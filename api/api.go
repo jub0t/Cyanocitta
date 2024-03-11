@@ -28,13 +28,14 @@ func Start(conf *config.Config) {
 
 	// Middlewares
 	r.Use(Serdeware)
-	r.Use(CustomBodyParser)
+	// r.Use(CustomBodyParser)
 
 	// Authentication
 	r.POST("/login", LoginRoute(db))
 	r.POST("/register", RegisterRoute(db))
 
 	// Bot Manage
+	r.GET("/bot/:bot_id", GetBotInfo(db), TokenMiddleware)
 	r.POST("/create-bot", CreateBotRoute(db), TokenMiddleware)
 	r.POST("/start-bot/:bot_id", StartBotRoute(db), TokenMiddleware)
 	r.POST("/delete-bot/:bot_id", DeleteBotRoute(db), TokenMiddleware)

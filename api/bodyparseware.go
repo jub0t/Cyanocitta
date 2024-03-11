@@ -3,6 +3,7 @@ package api
 import (
 	"disco/structs"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 
 	"github.com/labstack/echo/v4"
@@ -33,6 +34,7 @@ func CustomBodyParser(next echo.HandlerFunc) echo.HandlerFunc {
 			// echo.NewHTTPError(http.StatusBadRequest, errors.New("invalid JSON format"))
 		}
 
+		fmt.Println(parsedBody)
 		c.Set("Body", parsedBody)
 
 		return next(c)
