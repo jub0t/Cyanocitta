@@ -5,6 +5,7 @@ import (
 
 	"disco/config"
 	database "disco/db"
+	"disco/dfm"
 	"disco/prom"
 	"disco/structs"
 	"disco/utils"
@@ -62,10 +63,15 @@ func CreateBotRoute(db *gorm.DB) echo.HandlerFunc {
 			message = "Error creating new bot"
 		}
 
-		return c.JSON(responseCode, structs.ResponseAny{
+		space_created := dfm.MakeSpace(bot)
+
+		return c.JSON(responseCode, structs.Response{
 			Success: true,
 			Message: message,
-			Data:    bot,
+			Data: structs.AnyData{
+				"Bot":          bot,
+				"SpaceCreated": space_created,
+			},
 		})
 	}
 }

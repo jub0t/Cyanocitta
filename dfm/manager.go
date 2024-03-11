@@ -9,24 +9,26 @@ import (
 	"path/filepath"
 )
 
-var conf = config.GetConfig()
-
 func MakeSpace(bot structs.Bot) bool {
-	switch bot.Language {
-	case structs.JsLang:
-		{
-			dir_path := filepath.Clean(fmt.Sprintf("%s%s", conf.StorePath, bot.BotId))
-			if !Exists(dir_path) {
-				if err := os.Mkdir(dir_path, fs.ModePerm); err != nil {
-					fmt.Printf("Error Occured While Making Folder At %s\n", dir_path)
-				}
-			}
+	dir_path := filepath.Clean(fmt.Sprintf("%s%s", config.C.StorePath, bot.BotId))
+	println(dir_path)
 
-			return true
+	if !Exists(dir_path) {
+		if err := os.Mkdir(dir_path, fs.ModePerm); err != nil {
+			fmt.Printf("Error Occured While Making Folder At %s: %s\n", dir_path, err)
 		}
-	default:
-		{
-			return false
+	}
+
+	return true
+}
+
+func PrepareSpace() {
+	dir_path := filepath.Clean(config.C.StorePath)
+	if !Exists(dir_path) {
+		if err := os.Mkdir(dir_path, 0755); err != nil {
+			fmt.Printf("Space Folder Allocation Failed [%s]: %s\n", dir_path, err)
+		} else {
+			fmt.Printf("Space Folder Created: %s\n", dir_path)
 		}
 	}
 }
