@@ -32,3 +32,24 @@ func PrepareSpace() {
 		}
 	}
 }
+
+func StartFileByLanguage(lang int) string {
+	switch lang {
+	case structs.JsLang:
+		{
+			return "index.js"
+		}
+	case structs.GoLang:
+		{
+			return "main.go"
+		}
+	case structs.PyLang:
+		{
+			return "main.py"
+		}
+	default:
+		{
+			return ""
+		}
+	}
+}

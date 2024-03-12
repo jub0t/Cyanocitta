@@ -52,6 +52,7 @@ func CreateBotRoute(db *gorm.DB) echo.HandlerFunc {
 			MaxRestarts: 0,
 			BotId:       utils.RandomString(8),
 			Language:    lang,
+			StartFile:   dfm.StartFileByLanguage(lang),
 		}
 
 		result := database.DB.Create(&bot)

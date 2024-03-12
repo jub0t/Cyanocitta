@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/gommon/log"
 )
 
 var (
@@ -18,6 +19,9 @@ var (
 func Start(conf *config.Config) {
 	db := database.DB
 	r := echo.New()
+
+	r.Logger.SetLevel(log.OFF)
+	r.HideBanner = true
 
 	r.GET("/", func(ctx echo.Context) error {
 		return ctx.JSON(200, structs.Response{
@@ -41,6 +45,5 @@ func Start(conf *config.Config) {
 	r.POST("/delete-bot/:bot_id", DeleteBotRoute(db), TokenMiddleware)
 	r.GET("/process-resources/:pid", ProcessResourcesRoute())
 
-	fmt.Printf("Server Should Be Available http://localhost:%v\n", Port)
 	r.Start(fmt.Sprintf("127.0.0.1:%v", Port))
 }
